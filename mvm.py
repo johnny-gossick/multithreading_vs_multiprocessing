@@ -1,5 +1,5 @@
 from threading import Thread
-from random import shuffle
+from random import sample
 from multiprocessing import Process, Value
 from datetime import datetime
 import numpy as np
@@ -31,8 +31,7 @@ class AddingThread(Thread):
 def get_elapsed_time(start): return (datetime.now() - start).total_seconds()
 
 
-def get_random_numbers(number_count):
-    return np.array(shuffle(list(range(number_count))))
+def get_random_numbers(number_count): return np.array(range(number_count))
 
 
 def time_adding_serially(numbers_to_add):
@@ -61,10 +60,15 @@ def time_adding_concurrently(numbers_to_add, task_count, task_class_name):
 
 
 def run_experiment(number_count, task_count):
+    print('Generating numbers...')
     numbers_to_add = get_random_numbers(number_count)
+    print('Adding serially...')
     serial_time, serial_total = time_adding_serially(numbers_to_add)
+    print('Adding w/ multiprocessing...')
     multiprocess_time, multiprocess_total = time_adding_concurrently(numbers_to_add, task_count, AddingProcess)
+    print('Adding w/ multithreading...')
     multithreading_time, multithreading_total = time_adding_concurrently(numbers_to_add, task_count, AddingThread)
+    print('Adding w/ numpy...')
     numpy_time, numpy_total = time_adding_numpy(numbers_to_add)
 
     return pd.DataFrame({
@@ -77,7 +81,7 @@ def run_experiment(number_count, task_count):
 
 
 def main():
-    df = run_experiment(1000000000, 8)
+    df = run_experiment(100000000, 4)
     df.to_csv('results.csv')
     print(df)
 
